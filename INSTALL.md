@@ -1,250 +1,206 @@
 # Frameforge Syndicate 安装指南
 
-> **配置版本**: v2.1 (Optimized per Super Team Builder v2.0)
->
-> 按照本指南完成团队配置的安装和部署
+本指南将帮助你安装和配置 Frameforge Syndicate（铸帧先锋）专家团队。
 
 ---
 
-## 📋 前置要求
+## 📋 系统要求
 
-### 必需工具
-- Claude Code CLI（最新版）
-- Claude Access（Sonnet 4.6 或更高版本）
-
-### 可选MCP服务器
-- **sequential-thinking**：深度技术推导
-- **context7**：查询渲染技术文档
-
----
-
-## 📦 安装步骤
-
-### Step 1: 复制文件
-
-将整个 `frameforge-team` 目录复制到你的Claude配置目录：
-
-**Windows**:
-```
-%USERPROFILE%\.claude\skills\frameforge-coordinator\
-%USERPROFILE%\.claude\teams\frameforge-shader\
-%USERPROFILE%\.claude\teams\frameforge-spark\
-%USERPROFILE%\.claude\teams\frameforge-vertex\
-%USERPROFILE%\.claude\teams\frameforge-razor\
-%USERPROFILE%\.claude\teams\frameforge-silicon\
-%USERPROFILE%\.claude\teams\frameforge-forge\
-```
-
-**macOS/Linux**:
-```
-~/.claude/skills/frameforge-coordinator/
-~/.claude/teams/frameforge-shader/
-~/.claude/teams/frameforge-spark/
-~/.claude/teams/frameforge-vertex/
-~/.claude/teams/frameforge-razor/
-~/.claude/teams/frameforge-silicon/
-~/.claude/teams/frameforge-forge/
-```
-
-### Step 2: 文件放置
-
-**协调器Skill**:
-```
-skills/frameforge-coordinator/
-└── skill.md
-```
-
-**专家Agents**:
-```
-teams/
-├── frameforge-shader.md
-├── frameforge-spark.md
-├── frameforge-vertex.md
-├── frameforge-razor.md
-├── frameforge-silicon.md
-└── frameforge-forge.md
-```
-
-### Step 3: MCP配置（可选）
-
-如果你的系统已安装以下MCP服务器，无需额外配置：
-
-- `mcp__sequential-thinking__*`
-- `mcp__context7__*`
-
-专家会根据需要自动调用这些工具。
+- Claude Code 2.0+
+- Windows / macOS / Linux
+- 可选 MCP 工具：
+  - `mcp__sequential-thinking__sequentialThinking`
+  - `mcp__context7__resolve-library-id`
+  - `mcp__context7__query-docs`
 
 ---
 
-## ✅ 验证安装
+## 🚀 安装步骤
 
-### 测试协调器
+### Step 1: 复制文件到 Claude 配置目录
 
-在Claude Code中运行：
+#### Windows
+```bash
+# 复制协调器
+xcopy /E /I "N:\编程备份\3.0团队\frameforge-team\skills\frameforge-coordinator" "%USERPROFILE%\.claude\skills\frameforge-coordinator\"
 
-```
-Use frameforge-coordinator skill to analyze my game's rendering performance.
-```
-
-**预期结果**：
-- Atlas 应该响应该请求
-- 询问你具体的渲染问题
-- 开始P0需求解构阶段
-
-### 测试专家
-
-单独测试专家是否正常工作：
-
-```
-Use frameforge-shader agent to propose a subsurface scattering solution.
+# 复制专家配置
+xcopy /E /I "N:\编程备份\3.0团队\frameforge-team\agents\*.md" "%USERPROFILE%\.claude\agents\"
 ```
 
-**预期结果**：
-- Shader 应该生成 `<Proposal_Shader>` 标签包裹的提案
-- 包含技术方案、视觉效果、性能预估
+#### macOS / Linux
+```bash
+# 复制协调器
+cp -r "N:/编程备份/3.0团队/frameforge-team/skills/frameforge-coordinator" ~/.claude/skills/
+
+# 复制专家配置
+cp "N:/编程备份/3.0团队/frameforge-team/agents/"*.md ~/.claude/agents/
+```
+
+### Step 2: 验证安装
+
+启动 Claude Code，使用以下命令验证：
+
+```
+我需要优化一个森林场景的渲染性能
+```
+
+如果 Atlas（协调器）响应并开始 P1-P5 流程，则安装成功。
 
 ---
 
-## 🎯 快速开始
+## 🔧 配置选项
 
-### 示例1: 渲染优化
+### MCP 工具配置（可选）
 
+如果你有 MCP 工具，可以在 `skills/frameforge-coordinator/skill.md` 中确认以下工具已声明：
+
+```yaml
+tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - Edit
+  - Bash
+  - AskUserQuestion
+  - Task
+  - TaskCreate
+  - TaskUpdate
+  - TaskGet
+  - TaskList
 ```
-I need to optimize my game's lighting. It currently takes 8ms GPU budget,
-but I only have 3ms available. The target platform is PS5.
+
+专家成员的 MCP 工具需在各自的 `agents/*.md` 中声明：
+
+```yaml
+tools: Read, Glob, Grep, Write, Edit, Bash, mcp__sequential-thinking__sequentialThinking, mcp__context7__resolve-library-id, mcp__context7__query-docs
 ```
 
-### 示例2: 特效设计
+### 自定义模型（可选）
 
-```
-Design a magical explosion effect for my game. It needs to look AAA quality
-but cannot exceed 1ms GPU on PC mid-range hardware.
-```
+如果你希望特定专家使用更强的模型，可以在对应专家的 `*.md` 文件中修改：
 
-### 示例3: 场景优化
-
-```
-I have 50,000 trees in my forest scene and the frame rate drops to 20fps.
-How can I optimize this for 60fps?
-```
-
-### 示例4: 代码实现
-
-```
-@Forge, implement TDD-012: Compute Shader Frustum Culling for UE5.3
+```yaml
+model: opus  # 默认是 sonnet
 ```
 
 ---
 
-## 🔧 故障排除
+## 📂 文件位置说明
 
-### 问题1: 协调器无法触发
-
-**可能原因**：
-- skill.md 文件路径错误
-- description 格式错误
-
-**解决方法**：
-1. 检查文件是否在 `skills/frameforge-coordinator/` 目录
-2. 检查 description 是否符合格式（无双引号，单行）
-
-### 问题2: 专家无法触发
-
-**可能原因**：
-- agent.md 文件路径错误
-- description 格式错误
-- 触发词不匹配
-
-**解决方法**：
-1. 检查文件是否在 `teams/` 目录
-2. 检查 description 是否符合格式（双引号，`<example>`标签）
-3. 检查触发词是否与协调器一致
-
-### 问题3: MCP工具无法调用
-
-**可能原因**：
-- MCP服务器未安装
-- tools字段配置错误
-
-**解决方法**：
-1. 检查MCP服务器是否已安装
-2. 检查 agent.md 中的 tools 字段格式
-3. 查看协调器的MCP授权声明
-
----
-
-## 📚 进阶配置
-
-### 自定义性能预算
-
-编辑各专家的agent.md，修改性能预算数值：
-
-**Razor** (`frameforge-razor.md`):
-```markdown
-## 性能预算标准
-**PC（中配）**：
-- 总帧时：16.67ms
-- GPU预算：10ms
+### Windows
+```
+C:\Users\<用户名>\.claude\
+├── skills\
+│   └── frameforge-coordinator\
+│       └── skill.md
+└── agents\
+    ├── frameforge-shader.md
+    ├── frameforge-spark.md
+    ├── frameforge-vertex.md
+    ├── frameforge-razor.md
+    ├── frameforge-silicon.md
+    └── frameforge-forge.md
 ```
 
-### 添加新的目标平台
-
-编辑 **Silicon** (`frameforge-silicon.md`)，添加新平台的架构信息：
-
-```markdown
-### 主机架构
-**Nintendo Switch**：
-- GPU架构：Tegra X1
-- 带宽：25.6GB/s
-- ...
+### macOS / Linux
+```
+~/.claude/
+├── skills/
+│   └── frameforge-coordinator/
+│       └── skill.md
+└── agents/
+    ├── frameforge-shader.md
+    ├── frameforge-spark.md
+    ├── frameforge-vertex.md
+    ├── frameforge-razor.md
+    ├── frameforge-silicon.md
+    └── frameforge-forge.md
 ```
 
 ---
 
-## 📖 相关文档
+## 🧪 测试安装
 
-- **团队概述**：`README.md`
-- **超级团队构建器**：`super-team-builder` 技能文档
-- **检查清单**：`super-checklist.md`
+### 测试1：完整流程
+```
+我需要为PS5设计一个电影级的光照洞穴场景，目标60fps
+```
 
----
+**预期行为**：
+1. Atlas 分析需求并询问性能目标
+2. P1: Shader 提出光照方案
+3. P2: Razor + Silicon 并行评估
+4. P3: 提出优化方案（如需要）
+5. P4: 生成 TDD
+6. P5: Forge 生成代码
 
-## 💡 最佳实践
+### 测试2：单专家调用
+```
+分析这个shader的性能瓶颈
+```
 
-### 1. 明确目标平台
-
-使用时明确说明目标平台（PC/PS5/Xbox/Mobile），以便专家进行准确的性能评估。
-
-### 2. 提供具体数据
-
-尽可能提供具体数据：
-- 当前帧率/帧时
-- 目标帧率/帧时
-- 场景规模（物体数量、三角形数）
-- GPU型号
-
-### 3. 准备好资产信息
-
-如果涉及资产优化，准备好：
-- 模型面数
-- 贴图分辨率
-- 材质数量
-
-### 4. 分阶段使用
-
-- **方案探索阶段**：P0-P3，探索可行方案
-- **详细设计阶段**：P4，生成TDD
-- **代码实现阶段**：P5，生成代码
+**预期行为**：
+- Atlas 识别为性能分析任务
+- 直接调用 Razor（或 Razor + Silicon）
 
 ---
 
-## 🆘 获取帮助
+## ⚠️ 常见问题
 
-遇到问题时：
-1. 检查 `README.md` 了解团队概述
-2. 检查 `super-checklist.md` 验证配置
-3. 查看各专家的 `agent.md` 了解详细职责
+### Q1: 专家没有被触发？
+
+**A**: 检查以下几点：
+1. 文件是否放置在正确的目录
+2. skill.md 和 agent.md 文件格式是否正确
+3. Claude Code 是否已重启
+
+### Q2: MCP 工具无法使用？
+
+**A**:
+1. 确认 MCP 工具已正确配置
+2. 等待协调器明确授权后才使用
+3. 检查 tools 字段中是否声明了 MCP 工具
+
+### Q3: 代码生成失败？
+
+**A**:
+1. 确认 P4 阶段已生成 TDD
+2. Forge 需要 TDD 作为输入
+3. 检查 TDD 格式是否正确
 
 ---
 
-**祝使用愉快！** 🎮✨
+## 🔍 卸载
+
+### Windows
+```bash
+# 删除协调器
+rmdir /S /Q "%USERPROFILE%\.claude\skills\frameforge-coordinator"
+
+# 删除专家配置
+del "%USERPROFILE%\.claude\agents\frameforge-*.md"
+```
+
+### macOS / Linux
+```bash
+# 删除协调器
+rm -rf ~/.claude/skills/frameforge-coordinator
+
+# 删除专家配置
+rm ~/.claude/agents/frameforge-*.md
+```
+
+---
+
+## 📞 支持
+
+如有问题，请检查：
+1. [README.md](README.md) - 团队概述
+2. [技能文档](skills/frameforge-coordinator/skill.md) - 协调器详细说明
+3. [专家文档](agents/) - 各专家详细说明
+
+---
+
+**安装完成后，你就可以开始使用 Frameforge Syndicate 优化你的游戏渲染了！**
