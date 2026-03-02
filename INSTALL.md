@@ -1,194 +1,220 @@
 # Frameforge Syndicate 安装指南
 
-本指南将帮助你安装和配置 Frameforge Syndicate（铸帧先锋）专家团队。
+本文档提供 **Frameforge Syndicate** 团队配置包的完整安装说明。
 
 ---
 
-## 📋 系统要求
+## 系统要求
 
-- Claude Code 2.0+
-- Windows / macOS / Linux
-- 可选 MCP 工具：
-  - `mcp__sequential-thinking__sequentialThinking`
-  - `mcp__context7__resolve-library-id`
-  - `mcp__context7__query-docs`
+- Claude Code CLI
+- 支持的操作系统：Windows / macOS / Linux
 
 ---
 
-## 🚀 安装步骤
+## 快速安装
 
-### Step 1: 复制文件到 Claude 配置目录
+### 步骤1：定位Claude配置目录
 
-#### Windows
+根据您的操作系统，Claude配置目录位于：
+
+| 操作系统 | 配置目录 |
+|----------|----------|
+| **Windows** | `C:\Users\[用户名]\.claude\` |
+| **macOS** | `~/.claude/` |
+| **Linux** | `~/.claude/` |
+
+### 步骤2：安装协调器 Skill
+
+将协调器配置复制到Claude Skills目录：
+
 ```bash
-# 复制协调器
-xcopy /E /I "N:\编程备份\3.0团队\frameforge-team\skills\frameforge-coordinator" "%USERPROFILE%\.claude\skills\frameforge-coordinator\"
+# 创建目标目录（如果不存在）
+mkdir -p ~/.claude/skills/frameforge-coordinator
 
-# 复制专家配置
-xcopy /E /I "N:\编程备份\3.0团队\frameforge-team\agents\*.md" "%USERPROFILE%\.claude\agents\"
+# 复制协调器配置
+cp -r "N:/编程备份/4.0团队/frameforge-team/skills/frameforge-coordinator/skill.md" \
+      ~/.claude/skills/frameforge-coordinator/skill.md
 ```
 
-#### macOS / Linux
+### 步骤3：安装专家 Agents
+
+将专家配置复制到Claude Agents目录：
+
 ```bash
-# 复制协调器
-cp -r "N:/编程备份/3.0团队/frameforge-team/skills/frameforge-coordinator" ~/.claude/skills/
+# 创建目标目录（如果不存在）
+mkdir -p ~/.claude/agents
 
-# 复制专家配置
-cp "N:/编程备份/3.0团队/frameforge-team/agents/"*.md ~/.claude/agents/
+# 复制所有专家配置
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-shader.md" ~/.claude/agents/
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-spark.md" ~/.claude/agents/
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-vertex.md" ~/.claude/agents/
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-razor.md" ~/.claude/agents/
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-silicon.md" ~/.claude/agents/
+cp "N:/编程备份/4.0团队/frameforge-team/agents/frameforge-forge.md" ~/.claude/agents/
 ```
 
-### Step 2: 验证安装
+### 步骤4：验证安装
 
-启动 Claude Code，使用以下命令验证：
+重启Claude Code后，您可以通过以下方式验证安装：
 
-```
-我需要优化一个森林场景的渲染性能
-```yaml
-tools:
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - Edit
-  - Bash
-  - AskUserQuestion
-  - Task
-  - TaskCreate
-  - TaskUpdate
-  - TaskGet
-  - TaskList
-```
+1. **验证协调器**：
+   ```
+   /frameforge-coordinator
+   ```
 
-专家成员的 MCP 工具需在各自的 `agents/*.md` 中声明：
+2. **验证专家**：在对话中提及相关关键词，例如：
+   ```
+   "帮我设计一个AAA级渲染方案"
+   "我的场景帧率下降了，帮我分析瓶颈"
+   "帮我实现这个TDD文档中的代码"
+   ```
 
-```yaml
-tools: Read, Glob, Grep, Write, Edit, Bash, mcp__sequential-thinking__sequentialThinking, mcp__context7__resolve-library-id, mcp__context7__query-docs
-```
+---
 
-### 自定义模型（可选）
+## Windows一键安装脚本
 
-如果你希望特定专家使用更强的模型，可以在对应专家的 `*.md` 文件中修改：
+创建并运行以下Powerhell脚本：
 
-```yaml
-model: opus  # 默认是 sonnet
+```powershell
+# Frameforge Syndicate 安装脚本
+$claudeDir = "$env:USERPROFILE\.claude"
+$sourceDir = "N:\编程备份\4.0团队\frameforge-team"
+
+# 创建目录
+Write-Host "创建目录结构..."
+New-Item -ItemType Directory -Force -Path "$claudeDir\skills\frameforge-coordinator"
+New-Item -ItemType Directory -Force -Path "$claudeDir\agents"
+
+# 安装协调器
+Write-Host "安装协调器..."
+Copy-Item "$sourceDir\skills\frameforge-coordinator\skill.md" `
+          "$claudeDir\skills\frameforge-coordinator\skill.md" -Force
+
+# 安装专家
+Write-Host "安装专家代理..."
+$agents = @(
+    "frameforge-shader",
+    "frameforge-spark",
+    "frameforge-vertex",
+    "frameforge-razor",
+    "frameforge-silicon",
+    "frameforge-forge"
+)
+
+foreach ($agent in $agents) {
+    Copy-Item "$sourceDir\agents\$agent.md" "$claudeDir\agents\$agent.md" -Force
+    Write-Host "  ✓ $agent"
+}
+
+Write-Host ""
+Write-Host "✅ 安装完成！请重启Claude Code以生效。"
 ```
 
 ---
 
-## 📂 文件位置说明
+## 文件结构
 
-### Windows
-```
-C:\Users\<用户名>\.claude\
-├── skills\
-│   └── frameforge-coordinator\
-│       └── skill.md
-└── agents\
-    ├── frameforge-shader.md
-    ├── frameforge-spark.md
-    ├── frameforge-vertex.md
-    ├── frameforge-razor.md
-    ├── frameforge-silicon.md
-    └── frameforge-forge.md
-```
+安装后的目录结构：
 
-### macOS / Linux
 ```
 ~/.claude/
 ├── skills/
 │   └── frameforge-coordinator/
-│       └── skill.md
+│       └── skill.md               # 协调器Skill
 └── agents/
-    ├── frameforge-shader.md
-    ├── frameforge-spark.md
-    ├── frameforge-vertex.md
-    ├── frameforge-razor.md
-    ├── frameforge-silicon.md
-    └── frameforge-forge.md
+    ├── frameforge-shader.md       # 渲染专家
+    ├── frameforge-spark.md        # 特效专家
+    ├── frameforge-vertex.md       # 场景专家
+    ├── frameforge-razor.md        # 性能优化专家
+    ├── frameforge-silicon.md      # 硬件架构专家
+    └── frameforge-forge.md        # 执行工程师
 ```
 
 ---
 
-## 🧪 测试安装
+## 使用方法
 
-### 测试1：完整流程
-```
-我需要为PS5设计一个电影级的光照洞穴场景，目标60fps
-```
+### 启动团队
 
-**预期行为**：
-1. Atlas 分析需求并询问性能目标
-2. P1: Shader 提出光照方案
-3. P2: Razor + Silicon 并行评估
-4. P3: 提出优化方案（如需要）
-5. P4: 生成 TDD
-6. P5: Forge 生成代码
+在Claude Code中使用以下命令启动Frameforge团队：
 
-### 测试2：单专家调用
 ```
-分析这个shader的性能瓶颈
+/frameforge-coordinator
 ```
 
-**预期行为**：
-- Atlas 识别为性能分析任务
-- 直接调用 Razor（或 Razor + Silicon）
+或者直接描述您的渲染优化需求：
+
+```
+"我需要在UE5中实现大规模森林场景渲染，目标60FPS，目标平台PS5"
+```
+
+### 典型使用场景
+
+1. **渲染优化**：
+   ```
+   "我的场景在暗处噪点严重，如何优化SSAO？"
+   ```
+
+2. **特效设计**：
+   ```
+   "设计一个魔法爆炸特效，要求电影级画质但GPU耗时不超过2ms"
+   ```
+
+3. **性能调试**：
+   ```
+   "我的场景GPU帧时达到22ms，帮找出瓶颈"
+   ```
+
+4. **代码实现**：
+   ```
+   "帮我实现这个Compute Shader Frustum Culling"
+   ```
 
 ---
 
-## ⚠️ 常见问题
+## 故障排除
 
-### Q1: 专家没有被触发？
+### 问题1：协调器无法触发
 
-**A**: 检查以下几点：
-1. 文件是否放置在正确的目录
-2. skill.md 和 agent.md 文件格式是否正确
-3. Claude Code 是否已重启
+**可能原因**：skill.md文件位置错误
 
-### Q2: MCP 工具无法使用？
+**解决方案**：确保文件位于 `~/.claude/skills/frameforge-coordinator/skill.md`
 
-**A**:
-1. 确认 MCP 工具已正确配置
-2. 等待协调器明确授权后才使用
-3. 检查 tools 字段中是否声明了 MCP 工具
+### 问题2：专家无法触发
 
-### Q3: 代码生成失败？
+**可能原因**：agent配置文件位置错误或格式错误
 
-**A**:
-1. 确认 P4 阶段已生成 TDD
-2. Forge 需要 TDD 作为输入
-3. 检查 TDD 格式是否正确
+**解决方案**：
+1. 确保文件位于 `~/.claude/agents/` 目录
+2. 检查配置文件的YAML frontmatter格式
+
+### 问题3：MCP工具无法使用
+
+**可能原因**：MCP服务器未配置
+
+**解决方案**：在Claude设置中配置相应的MCP服务器
 
 ---
 
-## 🔍 卸载
+## 卸载
 
-### Windows
-```bash
-# 删除协调器
-rmdir /S /Q "%USERPROFILE%\.claude\skills\frameforge-coordinator"
+如需卸载，删除以下文件：
 
-# 删除专家配置
-del "%USERPROFILE%\.claude\agents\frameforge-*.md"
-```
-
-### macOS / Linux
 ```bash
 # 删除协调器
 rm -rf ~/.claude/skills/frameforge-coordinator
 
-# 删除专家配置
+# 删除专家
 rm ~/.claude/agents/frameforge-*.md
 ```
 
 ---
 
-## 📞 支持
+## 支持与反馈
 
-如有问题，请检查：
-1. [README.md](README.md) - 团队概述
-2. [技能文档](skills/frameforge-coordinator/skill.md) - 协调器详细说明
-3. [专家文档](agents/) - 各专家详细说明
+如有问题或建议，请联系团队维护者。
 
 ---
 
-**安装完成后，你就可以开始使用 Frameforge Syndicate 优化你的游戏渲染了！**
+**版本**：4.0
+**更新日期**：2026-03-02
